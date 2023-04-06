@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.gcxl.mapper.BusinessQueryMapper">
+    <resultMap id="getSaleInfo" type="BusinessQueryResult">
+        <id property="invoiceID" column="invoiceID"/>
+        <result property="invoiceDate" column="invoiceDate"/>
+        <result property="amount" column="amount"/>
+        <result property="invoiceType" column="invoiceType"/>
+        <result property="tradeName" column="tradeName"/>
+        <result property="nameCommodity" column="nameCommodity"/>
+        <result property="model" column="model"/>
+        <result property="unitPrice" column="unitPrice"/>
+        <result property="privateIntAmount" column="privateIntAmount"/>
+        <result property="operator" column="account"/>
+        <result property="creationDate" column="creationDate"/>
+    </resultMap>
+<!--     List<BusinessQueryResult> getSaleInfo(String contractID);    resultType="com.example.gcxl.domain.query.BusinessQueryResult"-->
+    <select id="getSaleInfo" resultMap="getSaleInfo">
+        select i.invoiceID,i.invoiceDate,i.amount,i.invoiceType,d.tradeName,d.nameCommodity,d.model,d.unitPrice,d.privateIntAmount,log.account,log.creationDate
+        from saleinvoice i
+                 inner join saleinvoicedetail d on i.invoiceID=d.invoiceID
+                 inner join modifylog log on i.invoiceID=log.typeID
+        where i.contractID=#{contractID} and log.operationType='添加'
+    </select>
+
+    <resultMap id="getTakeUpInfo" type="BusinessQueryResult">
+        <id property="invoiceID" column="purchaseInvoiceID"/>
+        <id property="purchasecontractID" column="purchasecontractID"/>
+<!--        <result property="purchasecontractID" column="purchasecontractID"/>-->
+        <result property="supplier" column="supplier"/>
+        <result property="invoiceDate" column="makeOutAnInvoiceDate"/>
+        <result property="amount" column="amount"/>
+        <result property="invoiceType" column="invoiceType"/>
+        <result property="tradeName" column="tradeName"/>
+        <result property="nameCommodity" column="nameCommodity"/>
+        <result property="model" column="model"/>
+        <result property="unitPrice" column="unitPrice"/>
+        <result property="privateIntAmount" column="associatedNumber"/>
+        <result property="operator" column="operator"/>
+        <result property="creationDate" column="operationDate"/>
+    </resultMap>
+<!--     List<BusinessQueryResult> getTakeUpInfo(String contractID);-->
+    <select id="getTakeUpInfo" resultMap="getTakeUpInfo">
+        select t.purchasecontractID, pc.supplier,t.purchaseInvoiceID,pi.makeOutAnInvoiceDate,t.tradeName,t.nameCommodity,t.model,t.unitPrice,t.associatedNumber,pi.invoiceType,t.operator,t.operationDate
+        from takeup t
+                 inner join purchasingcontract pc on pc.contractID=t.purchasecontractID
+                 inner join purchaseinvoice pi on pi.invoiceID=t.purchaseInvoiceID
+                 inner join saleinvoice si on si.invoiceID=t.invoiceID
+        where si.contractID=#{contractID} and t.status='正常'
+    </select>
+
+</mapper>

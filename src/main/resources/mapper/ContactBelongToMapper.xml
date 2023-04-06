@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gcxl.mapper.ContractBelongToMapper">
+    <insert id="addContractBelongTo" parameterType="com.example.gcxl.domain.ContractBelongTo">
+        insert into contractbelongto(name,contact,phoneNumber,status,creationdate,creator) values(#{name},#{contact},#{phoneNumber},#{status},now(),#{creator})
+    </insert>
+    <update id="modifyContractBelongTo" parameterType="com.example.gcxl.domain.ContractBelongTo">
+        update contractbelongto set name=#{name},contact=#{contact},phoneNumber=#{phoneNumber},status=#{status} where id=#{id}
+    </update>
+
+
+    <select id="findAllBelongByCondition" parameterType="com.example.gcxl.domain.query.ContractBelongToCondition" resultType="com.example.gcxl.domain.ContractBelongTo">
+        select * from contractbelongto where 1=1
+        <if test="name != null and name != ''">
+            and name like '%${name}%'
+        </if>
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+    </select>
+</mapper>

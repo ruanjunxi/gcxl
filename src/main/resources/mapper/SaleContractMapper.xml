@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gcxl.mapper.SaleContractMapper">
+
+    <insert id="AddContract" parameterType="com.example.gcxl.domain.SaleContract">
+        insert into salecontract(contractID,contractBelongsTo,region,dateContract,purchasingUnit,contractAmount,comment,
+            attachment,correlationRate,invoiceState,creationDate,creator,updateFrequency
+        )values(
+            #{contractID},#{contractBelongsTo},#{region},#{dateContract},#{purchasingUnit},#{contractAmount},#{comment},
+            #{attachment},0,'未开票',now(),#{creator},0
+                           )
+    </insert>
+
+<!--    Integer updateContract(String contractBelongTo,String region,String newContractId,
+                           String contractDate,String purchasingUnit,String contractAmount,String comment,String oldContractId);-->
+    <update id="updateContract">
+        update salecontract set contractBelongsTo=#{contractBelongTo},region=#{region},ContractId=#{newContractId},dateContract=#{contractDate},purchasingUnit=#{purchasingUnit},contractAmount=#{contractAmount},comment=#{comment},updateFrequency=updateFrequency+1 where ContractId=#{oldContractId}
+    </update>
+
+    <select id="getContractByCondition" parameterType="com.example.gcxl.domain.query.ContractCondition" resultType="com.example.gcxl.domain.SaleContract">
+        select * from salecontract where 1=1
+        <if test="contractId != null and contractId != ''">
+            and contractId like '%${contractId}%'
+        </if>
+        <if test="purchasingUnit != null and purchasingUnit != ''">
+            and purchasingUnit like '%${purchasingUnit}%'
+        </if>
+        <if test="comment != null and comment != ''">
+            and comment like '%${comment}%'
+        </if>
+        <if test="invoiceState != null and invoiceState != ''">
+            and invoiceState =#{invoiceState}
+        </if>
+    </select>
+    <select id="writeOffQuery" resultType="com.example.gcxl.domain.query.WriteOffResult">
+        select sc.purchasingUnit,sc.contractID,sc.dateContract,sc.contractAmount,sc.correlationRate,sc.invoiceState
+        from salecontract sc
+        where 1=1 and sc.correlationRate between #{lowRelationRate} and #{highRelationRate}
+        <if test="purchasingUnit != null and purchasingUnit != ''">
+            and sc.purchasingUnit like '%${purchasingUnit}%'
+        </if>
+        <if test="contractID != null and contractID != ''">
+            and sc.contractId like '%${contractID}%'
+        </if>
+<!--        <if test="status =='已完成'">-->
+<!--            and (si.status='已完成21' or si.status='已完成22'or si.status='已完成12')-->
+<!--        </if>-->
+<!--        <if test="status =='待完成'">-->
+<!--            and (si.status='已完成11' or si.status='已完成111'or si.status='待完成')-->
+<!--        </if>-->
+    </select>
+</mapper>

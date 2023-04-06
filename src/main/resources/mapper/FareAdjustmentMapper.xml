@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gcxl.mapper.FareAdjustmentMapper">
+    <insert id="addTakeup" parameterType="com.example.gcxl.domain.TakeUp">
+        insert into takeup(invoiceID,tradeName,nameCommodity,model,unitPrice,associatedNumber,purchaseInvoiceID,purchasecontractID,operator,operationDate,commodityID) values(#{saleInvoiceID},#{tradeName},#{nameCommodity},#{model},
+                                  #{unitPrice},#{associatedNumber},#{purchaseInvoiceID},#{purchaseContractID},#{operator},now(),#{commodityID})
+    </insert>
+
+<!--    List<TakeUpResult> findAllTakeUpByCondition(String supplier, String tradeName, String nameCommodity, String model);-->
+    <select id="findAllTakeUpByCondition" resultType="com.example.gcxl.domain.query.TakeUpResult">
+        select contract.supplier,contract.noteInformation,t.tradeName,t.nameCommodity,t.model,t.unitPrice,t.numberRemain,
+               t.invoiceID,contract.contractID,t.id
+        from purchasingcontract contract,purchaseinvoicedetail t,purchaseinvoice i
+        where t.invoiceID=i.invoiceID and i.contractID=contract.contractID
+        <if test="supplier != null and supplier != ''">
+            and contract.supplier like '%${supplier}%'
+        </if>
+        <if test="tradeName != null and tradeName != ''">
+            and t.tradeName like '%${tradeName}%'
+        </if>
+        <if test="nameCommodity != null and nameCommodity != ''">
+            and t.nameCommodity like '%${nameCommodity}%'
+        </if>
+        <if test="model != null and model != ''">
+            and t.model like '%${model}%'
+        </if>
+    </select>
+    <select id="findFareAdjustmentByCondition" resultType="com.example.gcxl.domain.CostOccupation">
+        select invoice.invoiceID,invoice.invoiceDate,invoice.invoiceType,invoice.contractID,invoice.amount,invoice.correlationRate,invoice.status,sc.purchasingUnit ,invoice.operation
+        from
+        saleinvoice invoice
+        left join salecontract sc on sc.contractID=invoice.contractID where 1=1 and invoice.correlationRate between #{lowCorrelationRate} and #{highCorrelationRate}
+        <if test="contractId != null and contractId != ''">
+            and invoice.contractID like '%${contractId}%'
+        </if>
+        <if test="status == '待完成'">
+            and invoice.status = '已完成11'
+        </if>
+        <if test="status == '已完成'">
+            and (invoice.status = '已完成12' or invoice.status = '已完成22')
+        </if>
+        <if test="status == null or status == ''">
+            and (invoice.status = '已完成12' or invoice.status = '已完成22' or invoice.status = '已完成11')
+        </if>
+        <if test="invoiceId != null and invoiceId != ''">
+            and invoice.invoiceID like '%${invoiceId}%'
+        </if>
+        <if test="purchasingUnit != null and purchasingUnit != ''">
+            and sc.purchasingUnit like '%${purchasingUnit}%'
+        </if>
+    </select>
+
+</mapper>

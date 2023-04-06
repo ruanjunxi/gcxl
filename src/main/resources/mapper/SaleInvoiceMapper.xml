@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gcxl.mapper.SaleInvoiceMapper">
+
+    <insert id="addInvoice" parameterType="com.example.gcxl.domain.SaleInvoice">
+        insert into saleinvoice(invoiceID,invoiceDate,invoiceType,attachment,creationDate,creator,contractID,amount,purchasingUnit)
+        values(#{invoiceID},#{invoiceDate},#{invoiceType},#{attachment},NOW(),#{creator},#{contractID},#{amount},#{purchasingUnit})
+    </insert>
+<!--    Integer addBatchInvoiceDetail(List<SaleInvoiceDetail> detailList);-->
+    <insert id="addBatchInvoiceDetail" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            insert into saleinvoicedetail(invoiceID,tradeName,nameCommodity,model,privateIntAmount,unitPrice,updateFrequency,amount)
+            values(#{item.invoiceID},#{item.tradeName},#{item.nameCommodity},#{item.model},#{item.privateIntAmount},#{item.unitPrice},0,#{item.amount})
+        </foreach>
+    </insert>
+
+    <update id="updateInvoiceDetailById" parameterType="com.example.gcxl.domain.SaleInvoiceDetail">
+        update saleinvoicedetail set tradeName=#{tradeName},nameCommodity=#{nameCommodity}, model=#{model}, privateIntAmount=#{privateIntAmount},unitPrice=#{unitPrice},
+                                     updateFrequency=updateFrequency+1,amount=#{amount} where invoiceID=#{invoiceID}
+    </update>
+    <select id="getSaleInvoiceByCondition" resultType="com.example.gcxl.domain.SaleInvoice">
+        select invoiceID,purchasingUnit,amount,invoiceType,invoiceDate,creator,creationDate from saleinvoice where 1=1
+        <if test="invoiceId != null and invoiceId != ''">
+            and invoiceId like '%${invoiceId}%'
+        </if>
+        <if test="purchasingUnit != null and purchasingUnit != ''">
+            and purchasingUnit like '%${purchasingUnit}%'
+        </if>
+        <if test="date1 != null and date1 != ''">
+            and year(invoiceDate) =#{date1}
+        </if>
+        <if test="date2 != null and date2 != ''">
+            and month(invoiceDate) =#{date2}
+        </if>
+    </select>
+</mapper>
